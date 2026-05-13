@@ -237,8 +237,8 @@
     <div class="pillars-grid">
       <div class="pillar-card">
         <svg class="pillar-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="18" stroke="#6b8f71" stroke-width="1.5"/>
-          <path d="M20 12v8l5 5" stroke="#6b8f71" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="20" cy="20" r="12" stroke="#6b8f71" stroke-width="1.5"/>
+          <path d="M20 14v6l4 4" stroke="#6b8f71" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
         <h3 class="pillar-title">Hearing your Story</h3>
         <p class="pillar-text">Everyone has a unique tale to tell and I want to hear it. Our life stories are packed with useful information which can help guide us in understanding ourselves better.</p>
@@ -251,10 +251,9 @@
         <h3 class="pillar-title">Exploring your Needs</h3>
         <p class="pillar-text">Together we can explore what truly matters to you and take steps towards positive change, at your own pace.</p>
       </div>
-      <div class="pillar-card">
-        <svg class="pillar-icon" viewBox="0 0 40 40" fill="none">
-          <path d="M20 8s-10 6-10 14a10 10 0 0020 0c0-8-10-14-10-14z" stroke="#4a8480" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M20 18v6" stroke="#4a8480" stroke-width="1.5" stroke-linecap="round"/>
+      <div class="pillar-card" id="pillar-rooted">
+        <svg class="pillar-icon" id="pillar-rooted-icon" viewBox="0 0 40 40" fill="none">
+          <path d="M20 32s-12-7-12-16a7 7 0 0 1 12-5 7 7 0 0 1 12 5c0 9-12 16-12 16z" stroke="#4a8480" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <h3 class="pillar-title">Rooted in Compassion</h3>
         <p class="pillar-text">Whether you're struggling with anxiety, managing anger, facing depression, or healing from trauma, you are heard, valued and met with warmth and without judgment.</p>
@@ -463,6 +462,80 @@
 
 
 <script>
+
+  // ── Tweakable defaults (persisted by the host) ──
+  const TWEAKS = /*EDITMODE-BEGIN*/{
+    "rootedIcon": "heart"
+  }/*EDITMODE-END*/;
+
+  const ROOTED_ICONS = {
+    heart: '<path d="M20 32s-12-7-12-16a7 7 0 0 1 12-5 7 7 0 0 1 12 5c0 9-12 16-12 16z" stroke="#4a8480" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',
+    drop: '<path d="M20 8s-10 6-10 14a10 10 0 0020 0c0-8-10-14-10-14z" stroke="#4a8480" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 18v6" stroke="#4a8480" stroke-width="1.5" stroke-linecap="round"/>',
+    leaf: '<path d="M10 30c0-12 8-20 20-20 0 12-8 20-20 20z" stroke="#4a8480" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 30 24 16" stroke="#4a8480" stroke-width="1.5" stroke-linecap="round"/>',
+    flower: '<circle cx="20" cy="20" r="3" stroke="#4a8480" stroke-width="1.5"/><path d="M20 17V9M20 23v8M17 20H9M23 20h8M14 14l-5-5M26 26l5 5M26 14l5-5M14 26l-5 5" stroke="#4a8480" stroke-width="1.5" stroke-linecap="round"/>'
+  };
+
+  function applyRootedIcon(key) {
+    const svg = document.getElementById('pillar-rooted-icon');
+    if (svg && ROOTED_ICONS[key]) svg.innerHTML = ROOTED_ICONS[key];
+  }
+  applyRootedIcon(TWEAKS.rootedIcon);
+
+  // ── Tweaks panel ──
+  (function setupTweaks() {
+    const panel = document.createElement('div');
+    panel.id = 'tweaks-panel';
+    panel.style.cssText = 'position:fixed;right:20px;bottom:20px;width:240px;background:#fff;border:1px solid #e2ddd2;border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,0.12);padding:16px;font-family:system-ui,sans-serif;font-size:13px;color:#2a2a2a;z-index:9999;display:none;';
+    panel.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <strong style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#2d605c;">Tweaks</strong>
+        <button id="tweaks-close" aria-label="Close" style="border:none;background:transparent;font-size:18px;line-height:1;cursor:pointer;color:#888;padding:0 4px;">×</button>
+      </div>
+      <div style="font-size:11px;color:#666;margin-bottom:6px;">Rooted in Compassion icon</div>
+      <div id="tweaks-icon-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;"></div>
+    `;
+    document.body.appendChild(panel);
+
+    const grid = panel.querySelector('#tweaks-icon-grid');
+    Object.keys(ROOTED_ICONS).forEach(key => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.icon = key;
+      btn.title = key;
+      btn.style.cssText = 'aspect-ratio:1;border:1px solid #e2ddd2;background:#fafaf6;border-radius:6px;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;';
+      btn.innerHTML = `<svg viewBox="0 0 40 40" fill="none" style="width:100%;height:100%;">${ROOTED_ICONS[key]}</svg>`;
+      btn.addEventListener('click', () => {
+        TWEAKS.rootedIcon = key;
+        applyRootedIcon(key);
+        updateActive();
+        window.parent.postMessage({type:'__edit_mode_set_keys', edits:{rootedIcon:key}}, '*');
+      });
+      grid.appendChild(btn);
+    });
+
+    function updateActive() {
+      grid.querySelectorAll('button').forEach(b => {
+        const on = b.dataset.icon === TWEAKS.rootedIcon;
+        b.style.borderColor = on ? '#2d605c' : '#e2ddd2';
+        b.style.background = on ? '#eef3ee' : '#fafaf6';
+      });
+    }
+    updateActive();
+
+    panel.querySelector('#tweaks-close').addEventListener('click', () => {
+      panel.style.display = 'none';
+      window.parent.postMessage({type:'__edit_mode_dismissed'}, '*');
+    });
+
+    window.addEventListener('message', (e) => {
+      const d = e.data;
+      if (!d || typeof d !== 'object') return;
+      if (d.type === '__activate_edit_mode') panel.style.display = 'block';
+      else if (d.type === '__deactivate_edit_mode') panel.style.display = 'none';
+    });
+
+    window.parent.postMessage({type:'__edit_mode_available'}, '*');
+  })();
 
   function toggleMenu() {
     const links = document.getElementById('nav-links');
